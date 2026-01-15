@@ -192,14 +192,9 @@
                     { id: 2, text: "Saturday: Grocery shop", checked: false },
                     { id: 3, text: "Sunday: Meal prep", checked: false }
                 ],
-                mindfulness: {
-                    morning: false,
-                    night: false,
-                    meditation: false
-                },
                 exercise: {
                     yoga: 0,
-                    yogaGoal: 7,
+                    yogaGoal: 2,
                     walks: 0,
                     walksGoal: 7,
                     goals: 0,
@@ -312,25 +307,6 @@
                                         }}
                                     />
                                 ))}
-                            </Card>
-                            
-                            {/* Mindfulness */}
-                            <Card title="🧘 Mindfulness">
-                                <CheckboxItem
-                                    label="Morning meditation"
-                                    checked={weekData.mindfulness.morning}
-                                    onChange={() => updateWeekData('mindfulness.morning', !weekData.mindfulness.morning)}
-                                />
-                                <CheckboxItem
-                                    label="Evening meditation"
-                                    checked={weekData.mindfulness.night}
-                                    onChange={() => updateWeekData('mindfulness.night', !weekData.mindfulness.night)}
-                                />
-                                <CheckboxItem
-                                    label="Meditation session"
-                                    checked={weekData.mindfulness.meditation}
-                                    onChange={() => updateWeekData('mindfulness.meditation', !weekData.mindfulness.meditation)}
-                                />
                             </Card>
                             
                             {/* Exercise */}
