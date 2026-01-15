@@ -39,6 +39,14 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #9ca3af;
         }
+        
+        /* Airbnb coral focus ring */
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            --tw-ring-color: #FF5A5F !important;
+            border-color: #FF5A5F !important;
+        }
     </style>
 </head>
 <body>
@@ -104,7 +112,8 @@
                         type="checkbox"
                         checked={checked}
                         onChange={onChange}
-                        className="w-5 h-5 rounded border-gray-300 bg-white text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        style={{ accentColor: '#FF5A5F' }}
+                        className="w-5 h-5 rounded border-gray-300 bg-white focus:ring-2 cursor-pointer"
                     />
                     <span className={`text-sm ${checked ? 'line-through text-gray-400' : 'text-gray-700'}`}>
                         {label}
@@ -131,7 +140,8 @@
                                 </button>
                                 <button
                                     onClick={onIncrement}
-                                    className="w-7 h-7 rounded bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-lg font-bold text-white"
+                                    style={{ backgroundColor: '#FF5A5F' }}
+                                    className="w-7 h-7 rounded hover:opacity-90 flex items-center justify-center text-lg font-bold text-white"
                                 >
                                     +
                                 </button>
@@ -140,8 +150,8 @@
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${Math.min(percentage, 100)}%` }}
+                            style={{ backgroundColor: '#FF5A5F', width: `${Math.min(percentage, 100)}%` }}
+                            className="h-2 rounded-full transition-all duration-300"
                         ></div>
                     </div>
                 </div>
@@ -160,7 +170,8 @@
                         onChange={(e) => onChange(e.target.value)}
                         onBlur={() => {}} // Auto-save handled by parent
                         placeholder={placeholder}
-                        className={`w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${multiline ? 'resize-none' : ''}`}
+                        style={{ '--focus-ring-color': '#FF5A5F' }}
+                        className={`w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-[#FF5A5F] ${multiline ? 'resize-none' : ''}`}
                         rows={multiline ? 3 : undefined}
                     />
                 </div>
@@ -391,7 +402,7 @@
                                             type="number"
                                             value={weekData.budget.amount}
                                             onChange={(e) => updateWeekData('budget.amount', parseFloat(e.target.value) || 0)}
-                                            className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2"
                                             placeholder="0"
                                         />
                                     </div>
@@ -401,7 +412,7 @@
                                             type="number"
                                             value={weekData.budget.spent}
                                             onChange={(e) => updateWeekData('budget.spent', parseFloat(e.target.value) || 0)}
-                                            className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2"
                                             placeholder="0"
                                         />
                                     </div>
