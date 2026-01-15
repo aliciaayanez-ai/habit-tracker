@@ -413,9 +413,10 @@
                                             value={weekData.budget.amount}
                                             onChange={(e) => {
                                                 // #region agent log
-                                                fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:404',message:'Budget onChange fired',data:{rawValue:e.target.value,parsedFloat:parseFloat(e.target.value),finalValue:parseFloat(e.target.value)||0,currentAmount:weekData.budget.amount},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+                                                fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:404',message:'Budget onChange fired',data:{rawValue:e.target.value,parsedFloat:parseFloat(e.target.value),finalValue:parseFloat(e.target.value)||0,currentAmount:weekData.budget.amount},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A',runId:'post-fix'})}).catch(()=>{});
                                                 // #endregion
-                                                updateWeekData('budget.amount', parseFloat(e.target.value) || 0);
+                                                const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                                updateWeekData('budget.amount', isNaN(val) ? 0 : val);
                                             }}
                                             className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2"
                                             placeholder="0"
@@ -428,9 +429,10 @@
                                             value={weekData.budget.spent}
                                             onChange={(e) => {
                                                 // #region agent log
-                                                fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:414',message:'Spent onChange fired',data:{rawValue:e.target.value,parsedFloat:parseFloat(e.target.value),finalValue:parseFloat(e.target.value)||0,currentSpent:weekData.budget.spent},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+                                                fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:414',message:'Spent onChange fired',data:{rawValue:e.target.value,parsedFloat:parseFloat(e.target.value),finalValue:parseFloat(e.target.value)||0,currentSpent:weekData.budget.spent},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A',runId:'post-fix'})}).catch(()=>{});
                                                 // #endregion
-                                                updateWeekData('budget.spent', parseFloat(e.target.value) || 0);
+                                                const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                                updateWeekData('budget.spent', isNaN(val) ? 0 : val);
                                             }}
                                             className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2"
                                             placeholder="0"
