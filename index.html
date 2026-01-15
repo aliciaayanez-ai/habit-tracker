@@ -248,6 +248,9 @@
             }, [weekData, weekKey]);
             
             const updateWeekData = (path, value) => {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:250',message:'updateWeekData called',data:{path:path,value:value,valueType:typeof value},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
                 setWeekData(prev => {
                     const newData = { ...prev };
                     const keys = path.split('.');
@@ -258,6 +261,9 @@
                     }
                     
                     current[keys[keys.length - 1]] = value;
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:260',message:'updateWeekData setting value',data:{path:path,oldValue:prev.budget,newValue:newData.budget},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+                    // #endregion
                     return newData;
                 });
             };
@@ -277,6 +283,10 @@
             if (!weekData) {
                 return <div className="flex items-center justify-center h-screen">Loading...</div>;
             }
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:287',message:'Component render',data:{budgetAmount:weekData.budget.amount,budgetSpent:weekData.budget.spent},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
             
             return (
                 <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -401,7 +411,12 @@
                                         <input
                                             type="number"
                                             value={weekData.budget.amount}
-                                            onChange={(e) => updateWeekData('budget.amount', parseFloat(e.target.value) || 0)}
+                                            onChange={(e) => {
+                                                // #region agent log
+                                                fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:404',message:'Budget onChange fired',data:{rawValue:e.target.value,parsedFloat:parseFloat(e.target.value),finalValue:parseFloat(e.target.value)||0,currentAmount:weekData.budget.amount},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+                                                // #endregion
+                                                updateWeekData('budget.amount', parseFloat(e.target.value) || 0);
+                                            }}
                                             className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2"
                                             placeholder="0"
                                         />
@@ -411,7 +426,12 @@
                                         <input
                                             type="number"
                                             value={weekData.budget.spent}
-                                            onChange={(e) => updateWeekData('budget.spent', parseFloat(e.target.value) || 0)}
+                                            onChange={(e) => {
+                                                // #region agent log
+                                                fetch('http://127.0.0.1:7242/ingest/e2badd19-ac9f-41ec-bac5-a547df912254',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:414',message:'Spent onChange fired',data:{rawValue:e.target.value,parsedFloat:parseFloat(e.target.value),finalValue:parseFloat(e.target.value)||0,currentSpent:weekData.budget.spent},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+                                                // #endregion
+                                                updateWeekData('budget.spent', parseFloat(e.target.value) || 0);
+                                            }}
                                             className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2"
                                             placeholder="0"
                                         />
