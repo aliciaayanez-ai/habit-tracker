@@ -313,96 +313,6 @@
                         
                         {/* Grid of Category Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Weekly Reminders */}
-                            <Card title="📋 Weekly Reminders">
-                                {weekData.weeklyReminders.map(item => (
-                                    <CheckboxItem
-                                        key={item.id}
-                                        label={item.text}
-                                        checked={item.checked}
-                                        onChange={() => {
-                                            const updated = weekData.weeklyReminders.map(r =>
-                                                r.id === item.id ? { ...r, checked: !r.checked } : r
-                                            );
-                                            updateWeekData('weeklyReminders', updated);
-                                        }}
-                                    />
-                                ))}
-                            </Card>
-                            
-                            {/* Exercise */}
-                            <Card title="💪 Exercise">
-                                <CounterItem
-                                    label="Yoga"
-                                    current={weekData.exercise.yoga}
-                                    goal={weekData.exercise.yogaGoal}
-                                    onIncrement={() => updateWeekData('exercise.yoga', weekData.exercise.yoga + 1)}
-                                    onDecrement={() => updateWeekData('exercise.yoga', Math.max(0, weekData.exercise.yoga - 1))}
-                                />
-                                <CounterItem
-                                    label="Walks"
-                                    current={weekData.exercise.walks}
-                                    goal={weekData.exercise.walksGoal}
-                                    onIncrement={() => updateWeekData('exercise.walks', weekData.exercise.walks + 1)}
-                                    onDecrement={() => updateWeekData('exercise.walks', Math.max(0, weekData.exercise.walks - 1))}
-                                />
-                                <CounterItem
-                                    label="Goals met"
-                                    current={weekData.exercise.goals}
-                                    goal={weekData.exercise.goalsGoal}
-                                    onIncrement={() => updateWeekData('exercise.goals', weekData.exercise.goals + 1)}
-                                    onDecrement={() => updateWeekData('exercise.goals', Math.max(0, weekData.exercise.goals - 1))}
-                                />
-                            </Card>
-                            
-                            {/* Job Search */}
-                            <Card title="💼 Job Search">
-                                <TextInput
-                                    label="Status"
-                                    value={weekData.jobSearch.status}
-                                    onChange={(value) => updateWeekData('jobSearch.status', value)}
-                                    placeholder="Current job search status..."
-                                />
-                                <CheckboxItem
-                                    label="Networking"
-                                    checked={weekData.jobSearch.networking}
-                                    onChange={() => updateWeekData('jobSearch.networking', !weekData.jobSearch.networking)}
-                                />
-                                <CounterItem
-                                    label="Applications"
-                                    current={weekData.jobSearch.applications}
-                                    goal={weekData.jobSearch.applicationsGoal}
-                                    onIncrement={() => updateWeekData('jobSearch.applications', weekData.jobSearch.applications + 1)}
-                                    onDecrement={() => updateWeekData('jobSearch.applications', Math.max(0, weekData.jobSearch.applications - 1))}
-                                />
-                                <TextInput
-                                    label="What are you building?"
-                                    value={weekData.jobSearch.building}
-                                    onChange={(value) => updateWeekData('jobSearch.building', value)}
-                                    placeholder="Projects you're working on..."
-                                    multiline={true}
-                                />
-                            </Card>
-                            
-                            {/* Tango */}
-                            <Card title="💃 Tango">
-                                <CheckboxItem
-                                    label="Practice session"
-                                    checked={weekData.tango.practice}
-                                    onChange={() => updateWeekData('tango.practice', !weekData.tango.practice)}
-                                />
-                                <CheckboxItem
-                                    label="Attended class"
-                                    checked={weekData.tango.class}
-                                    onChange={() => updateWeekData('tango.class', !weekData.tango.class)}
-                                />
-                                <CheckboxItem
-                                    label="Went to milonga"
-                                    checked={weekData.tango.milonga}
-                                    onChange={() => updateWeekData('tango.milonga', !weekData.tango.milonga)}
-                                />
-                            </Card>
-                            
                             {/* Weekly Budget */}
                             <Card title="💰 Weekly Budget">
                                 <div className="space-y-4">
@@ -451,6 +361,79 @@
                                 </div>
                             </Card>
                             
+                            {/* Exercise */}
+                            <Card title="💪 Exercise">
+                                <CounterItem
+                                    label="Yoga"
+                                    current={weekData.exercise.yoga}
+                                    goal={weekData.exercise.yogaGoal}
+                                    onIncrement={() => updateWeekData('exercise.yoga', weekData.exercise.yoga + 1)}
+                                    onDecrement={() => updateWeekData('exercise.yoga', Math.max(0, weekData.exercise.yoga - 1))}
+                                />
+                                <CounterItem
+                                    label="Walks"
+                                    current={weekData.exercise.walks}
+                                    goal={weekData.exercise.walksGoal}
+                                    onIncrement={() => updateWeekData('exercise.walks', weekData.exercise.walks + 1)}
+                                    onDecrement={() => updateWeekData('exercise.walks', Math.max(0, weekData.exercise.walks - 1))}
+                                />
+                                <CounterItem
+                                    label="Goals met"
+                                    current={weekData.exercise.goals}
+                                    goal={weekData.exercise.goalsGoal}
+                                    onIncrement={() => updateWeekData('exercise.goals', weekData.exercise.goals + 1)}
+                                    onDecrement={() => updateWeekData('exercise.goals', Math.max(0, weekData.exercise.goals - 1))}
+                                />
+                            </Card>
+                            
+                            {/* Tango */}
+                            <Card title="💃 Tango">
+                                <CheckboxItem
+                                    label="Practice session"
+                                    checked={weekData.tango.practice}
+                                    onChange={() => updateWeekData('tango.practice', !weekData.tango.practice)}
+                                />
+                                <CheckboxItem
+                                    label="Attended class"
+                                    checked={weekData.tango.class}
+                                    onChange={() => updateWeekData('tango.class', !weekData.tango.class)}
+                                />
+                                <CheckboxItem
+                                    label="Went to milonga"
+                                    checked={weekData.tango.milonga}
+                                    onChange={() => updateWeekData('tango.milonga', !weekData.tango.milonga)}
+                                />
+                            </Card>
+                            
+                            {/* Job Search */}
+                            <Card title="💼 Job Search">
+                                <TextInput
+                                    label="Status"
+                                    value={weekData.jobSearch.status}
+                                    onChange={(value) => updateWeekData('jobSearch.status', value)}
+                                    placeholder="Current job search status..."
+                                />
+                                <CheckboxItem
+                                    label="Networking"
+                                    checked={weekData.jobSearch.networking}
+                                    onChange={() => updateWeekData('jobSearch.networking', !weekData.jobSearch.networking)}
+                                />
+                                <CounterItem
+                                    label="Applications"
+                                    current={weekData.jobSearch.applications}
+                                    goal={weekData.jobSearch.applicationsGoal}
+                                    onIncrement={() => updateWeekData('jobSearch.applications', weekData.jobSearch.applications + 1)}
+                                    onDecrement={() => updateWeekData('jobSearch.applications', Math.max(0, weekData.jobSearch.applications - 1))}
+                                />
+                                <TextInput
+                                    label="What are you building?"
+                                    value={weekData.jobSearch.building}
+                                    onChange={(value) => updateWeekData('jobSearch.building', value)}
+                                    placeholder="Projects you're working on..."
+                                    multiline={true}
+                                />
+                            </Card>
+                            
                             {/* Luna Training */}
                             <Card title="🐕 Luna Training">
                                 <CheckboxItem
@@ -468,6 +451,23 @@
                                     checked={weekData.luna.play}
                                     onChange={() => updateWeekData('luna.play', !weekData.luna.play)}
                                 />
+                            </Card>
+                            
+                            {/* Weekly Reminders */}
+                            <Card title="📋 Weekly Reminders">
+                                {weekData.weeklyReminders.map(item => (
+                                    <CheckboxItem
+                                        key={item.id}
+                                        label={item.text}
+                                        checked={item.checked}
+                                        onChange={() => {
+                                            const updated = weekData.weeklyReminders.map(r =>
+                                                r.id === item.id ? { ...r, checked: !r.checked } : r
+                                            );
+                                            updateWeekData('weeklyReminders', updated);
+                                        }}
+                                    />
+                                ))}
                             </Card>
                         </div>
                     </div>
