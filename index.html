@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM via CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Utility functions for date handling
+        const getWeekNumber = (date) => {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        };
+        
+        const getWeekKey = (date) => {
+            const year = date.getFullYear();
+            const week = getWeekNumber(date);
+            return `week-${year}-W${String(week).padStart(2, '0')}`;
+        };
+        
+        const getWeekDates = (date) => {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+            const monday = new Date(d.setDate(diff));
+            const sunday = new Date(monday);
+            sunday.setDate(sunday.getDate() + 6);
+            
+            return {
+                start: monday,
+                end: sunday,
+                display: `${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+            };
+        };
+        
+        // Storage utilities
+        const saveToStorage = (weekKey, data) => {
+            try {
+                localStorage.setItem(weekKey, JSON.stringify(data));
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+            }
+        };
+        
+        const loadFromStorage = (weekKey) => {
+            try {
+                const data = localStorage.getItem(weekKey);
+                return data ? JSON.parse(data) : null;
+            } catch (error) {
+                console.error('Error loading from localStorage:', error);
+                return null;
+            }
+        };
+        
+        // Components
+        const CheckboxItem = ({ label, checked, onChange }) => {
+            return (
+                <div className="flex items-center space-x-3 py-2">
+                    <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={onChange}
+                        className="w-5 h-5 rounded border-gray-300 bg-white text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className={`text-sm ${checked ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                        {label}
+                    </span>
+                </div>
+            );
+        };
+        
+        const CounterItem = ({ label, current, goal, onIncrement, onDecrement }) => {
+            const percentage = goal > 0 ? (current / goal) * 100 : 0;
+            
+            return (
+                <div className="py-3">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-700">{label}</span>
+                        <div className="flex items-center space-x-3">
+                            <span className="text-sm font-medium text-gray-900">{current}/{goal}</span>
+                            <div className="flex space-x-1">
+                                <button
+                                    onClick={onDecrement}
+                                    className="w-7 h-7 rounded bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700"
+                                >
+                                    -
+                                </button>
+                                <button
+                                    onClick={onIncrement}
+                                    className="w-7 h-7 rounded bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-lg font-bold text-white"
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${Math.min(percentage, 100)}%` }}
+                        ></div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const TextInput = ({ label, value, onChange, placeholder, multiline = false }) => {
+            const InputComponent = multiline ? 'textarea' : 'input';
+            
+            return (
+                <div className="py-2">
+                    <label className="text-sm text-gray-600 block mb-2">{label}</label>
+                    <InputComponent
+                        type={multiline ? undefined : "text"}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        onBlur={() => {}} // Auto-save handled by parent
+                        placeholder={placeholder}
+                        className={`w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${multiline ? 'resize-none' : ''}`}
+                        rows={multiline ? 3 : undefined}
+                    />
+                </div>
+            );
+        };
+        
+        const Card = ({ title, children }) => {
+            return (
+                <div className="bg-white rounded-lg p-5 shadow-md border border-gray-200">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900">{title}</h3>
+                    {children}
+                </div>
+            );
+        };
+        
+        // Main App Component
+        const HabitTracker = () => {
+            const [currentDate, setCurrentDate] = useState(new Date());
+            const [weekData, setWeekData] = useState(null);
+            
+            const weekKey = getWeekKey(currentDate);
+            const weekDates = getWeekDates(currentDate);
+            const weekNumber = getWeekNumber(currentDate);
+            
+            // Initialize default data structure
+            const getDefaultData = () => ({
+                weeklyReminders: [
+                    { id: 1, text: "Friday: Meal plan", checked: false },
+                    { id: 2, text: "Saturday: Grocery shop", checked: false },
+                    { id: 3, text: "Sunday: Meal prep", checked: false }
+                ],
+                mindfulness: {
+                    morning: false,
+                    night: false,
+                    meditation: false
+                },
+                exercise: {
+                    yoga: 0,
+                    yogaGoal: 7,
+                    walks: 0,
+                    walksGoal: 7,
+                    goals: 0,
+                    goalsGoal: 7
+                },
+                jobSearch: {
+                    status: "",
+                    networking: false,
+                    applications: 0,
+                    applicationsGoal: 7,
+                    building: ""
+                },
+                tango: {
+                    practice: false,
+                    class: false,
+                    milonga: false
+                },
+                budget: {
+                    amount: 0,
+                    spent: 0
+                },
+                luna: {
+                    training: false,
+                    walk: false,
+                    play: false
+                }
+            });
+            
+            // Load data for current week
+            useEffect(() => {
+                const stored = loadFromStorage(weekKey);
+                setWeekData(stored || getDefaultData());
+            }, [weekKey]);
+            
+            // Save data whenever it changes
+            useEffect(() => {
+                if (weekData) {
+                    saveToStorage(weekKey, weekData);
+                }
+            }, [weekData, weekKey]);
+            
+            const updateWeekData = (path, value) => {
+                setWeekData(prev => {
+                    const newData = { ...prev };
+                    const keys = path.split('.');
+                    let current = newData;
+                    
+                    for (let i = 0; i < keys.length - 1; i++) {
+                        current = current[keys[i]];
+                    }
+                    
+                    current[keys[keys.length - 1]] = value;
+                    return newData;
+                });
+            };
+            
+            const goToPreviousWeek = () => {
+                const newDate = new Date(currentDate);
+                newDate.setDate(newDate.getDate() - 7);
+                setCurrentDate(newDate);
+            };
+            
+            const goToNextWeek = () => {
+                const newDate = new Date(currentDate);
+                newDate.setDate(newDate.getDate() + 7);
+                setCurrentDate(newDate);
+            };
+            
+            if (!weekData) {
+                return <div className="flex items-center justify-center h-screen">Loading...</div>;
+            }
+            
+            return (
+                <div className="min-h-screen bg-gray-50 py-8 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Header with Week Navigation */}
+                        <div className="flex items-center justify-between mb-8 bg-white rounded-lg p-4 shadow-md border border-gray-200">
+                            <button
+                                onClick={goToPreviousWeek}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors text-gray-700"
+                            >
+                                ← Previous
+                            </button>
+                            <div className="text-center">
+                                <h1 className="text-2xl font-bold text-gray-900">Week {weekNumber}</h1>
+                                <p className="text-sm text-gray-600 mt-1">{weekDates.display}</p>
+                            </div>
+                            <button
+                                onClick={goToNextWeek}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors text-gray-700"
+                            >
+                                Next →
+                            </button>
+                        </div>
+                        
+                        {/* Grid of Category Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Weekly Reminders */}
+                            <Card title="📋 Weekly Reminders">
+                                {weekData.weeklyReminders.map(item => (
+                                    <CheckboxItem
+                                        key={item.id}
+                                        label={item.text}
+                                        checked={item.checked}
+                                        onChange={() => {
+                                            const updated = weekData.weeklyReminders.map(r =>
+                                                r.id === item.id ? { ...r, checked: !r.checked } : r
+                                            );
+                                            updateWeekData('weeklyReminders', updated);
+                                        }}
+                                    />
+                                ))}
+                            </Card>
+                            
+                            {/* Mindfulness */}
+                            <Card title="🧘 Mindfulness">
+                                <CheckboxItem
+                                    label="Morning meditation"
+                                    checked={weekData.mindfulness.morning}
+                                    onChange={() => updateWeekData('mindfulness.morning', !weekData.mindfulness.morning)}
+                                />
+                                <CheckboxItem
+                                    label="Evening meditation"
+                                    checked={weekData.mindfulness.night}
+                                    onChange={() => updateWeekData('mindfulness.night', !weekData.mindfulness.night)}
+                                />
+                                <CheckboxItem
+                                    label="Meditation session"
+                                    checked={weekData.mindfulness.meditation}
+                                    onChange={() => updateWeekData('mindfulness.meditation', !weekData.mindfulness.meditation)}
+                                />
+                            </Card>
+                            
+                            {/* Exercise */}
+                            <Card title="💪 Exercise">
+                                <CounterItem
+                                    label="Yoga"
+                                    current={weekData.exercise.yoga}
+                                    goal={weekData.exercise.yogaGoal}
+                                    onIncrement={() => updateWeekData('exercise.yoga', weekData.exercise.yoga + 1)}
+                                    onDecrement={() => updateWeekData('exercise.yoga', Math.max(0, weekData.exercise.yoga - 1))}
+                                />
+                                <CounterItem
+                                    label="Walks"
+                                    current={weekData.exercise.walks}
+                                    goal={weekData.exercise.walksGoal}
+                                    onIncrement={() => updateWeekData('exercise.walks', weekData.exercise.walks + 1)}
+                                    onDecrement={() => updateWeekData('exercise.walks', Math.max(0, weekData.exercise.walks - 1))}
+                                />
+                                <CounterItem
+                                    label="Goals met"
+                                    current={weekData.exercise.goals}
+                                    goal={weekData.exercise.goalsGoal}
+                                    onIncrement={() => updateWeekData('exercise.goals', weekData.exercise.goals + 1)}
+                                    onDecrement={() => updateWeekData('exercise.goals', Math.max(0, weekData.exercise.goals - 1))}
+                                />
+                            </Card>
+                            
+                            {/* Job Search */}
+                            <Card title="💼 Job Search">
+                                <TextInput
+                                    label="Status"
+                                    value={weekData.jobSearch.status}
+                                    onChange={(value) => updateWeekData('jobSearch.status', value)}
+                                    placeholder="Current job search status..."
+                                />
+                                <CheckboxItem
+                                    label="Networking"
+                                    checked={weekData.jobSearch.networking}
+                                    onChange={() => updateWeekData('jobSearch.networking', !weekData.jobSearch.networking)}
+                                />
+                                <CounterItem
+                                    label="Applications"
+                                    current={weekData.jobSearch.applications}
+                                    goal={weekData.jobSearch.applicationsGoal}
+                                    onIncrement={() => updateWeekData('jobSearch.applications', weekData.jobSearch.applications + 1)}
+                                    onDecrement={() => updateWeekData('jobSearch.applications', Math.max(0, weekData.jobSearch.applications - 1))}
+                                />
+                                <TextInput
+                                    label="What are you building?"
+                                    value={weekData.jobSearch.building}
+                                    onChange={(value) => updateWeekData('jobSearch.building', value)}
+                                    placeholder="Projects you're working on..."
+                                    multiline={true}
+                                />
+                            </Card>
+                            
+                            {/* Tango */}
+                            <Card title="💃 Tango">
+                                <CheckboxItem
+                                    label="Practice session"
+                                    checked={weekData.tango.practice}
+                                    onChange={() => updateWeekData('tango.practice', !weekData.tango.practice)}
+                                />
+                                <CheckboxItem
+                                    label="Attended class"
+                                    checked={weekData.tango.class}
+                                    onChange={() => updateWeekData('tango.class', !weekData.tango.class)}
+                                />
+                                <CheckboxItem
+                                    label="Went to milonga"
+                                    checked={weekData.tango.milonga}
+                                    onChange={() => updateWeekData('tango.milonga', !weekData.tango.milonga)}
+                                />
+                            </Card>
+                            
+                            {/* Weekly Budget */}
+                            <Card title="💰 Weekly Budget">
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-sm text-gray-600 block mb-2">Budget</label>
+                                        <input
+                                            type="number"
+                                            value={weekData.budget.amount}
+                                            onChange={(e) => updateWeekData('budget.amount', parseFloat(e.target.value) || 0)}
+                                            className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-gray-600 block mb-2">Spent</label>
+                                        <input
+                                            type="number"
+                                            value={weekData.budget.spent}
+                                            onChange={(e) => updateWeekData('budget.spent', parseFloat(e.target.value) || 0)}
+                                            className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                    <div className="pt-3 border-t border-gray-200">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Remaining</span>
+                                            <span className={`text-lg font-bold ${
+                                                weekData.budget.amount - weekData.budget.spent >= 0 
+                                                    ? 'text-green-600' 
+                                                    : 'text-red-600'
+                                            }`}>
+                                                ${(weekData.budget.amount - weekData.budget.spent).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                            
+                            {/* Luna Training */}
+                            <Card title="🐕 Luna Training">
+                                <CheckboxItem
+                                    label="Training session"
+                                    checked={weekData.luna.training}
+                                    onChange={() => updateWeekData('luna.training', !weekData.luna.training)}
+                                />
+                                <CheckboxItem
+                                    label="Daily walk"
+                                    checked={weekData.luna.walk}
+                                    onChange={() => updateWeekData('luna.walk', !weekData.luna.walk)}
+                                />
+                                <CheckboxItem
+                                    label="Play time"
+                                    checked={weekData.luna.play}
+                                    onChange={() => updateWeekData('luna.play', !weekData.luna.play)}
+                                />
+                            </Card>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<HabitTracker />);
+    </script>
+</body>
+</html>
